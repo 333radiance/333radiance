@@ -232,3 +232,11 @@ elif st.session_state.page == 1:
             
     with col2:
         st.link_button("👉 探索 IG", "https://www.instagram.com/333radiance/", use_container_width=True)
+
+/* 完全隱藏右下角官方管理按鈕與圖示 */
+[data-testid="manage-app-button"],
+.stAppDeployButton,
+div[class*="viewerBadge"],
+div[data-testid="stStatusWidget"] {
+    display: none !important;
+}

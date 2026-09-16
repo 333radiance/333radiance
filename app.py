@@ -7,7 +7,7 @@ from openai import OpenAI
 # 頁面基礎設定
 st.set_page_config(page_title="333radiance 靜心空間", page_icon="✨", layout="centered")
 
-# 華德福色彩 + Chiron GoRound TC 特粗體 + 緊湊版面設定
+# 華德福色彩 + Chiron GoRound TC 特粗體 + 適度間距版面
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Chiron+GoRound+HK:wght@800;900&family=Chiron+GoRound+TC:wght@800;900&display=swap');
@@ -24,32 +24,32 @@ st.markdown("""
     }
     
     h1, .stTitle {
-        font-size: 1.3rem !important;
+        font-size: 1.35rem !important;
         font-weight: 900 !important;
-        padding-top: 0.1rem !important;
-        padding-bottom: 0.1rem !important;
+        padding-top: 0.2rem !important;
+        padding-bottom: 0.2rem !important;
         margin-bottom: 0px !important;
         text-align: center !important;
     }
 
     p {
-        font-size: 0.9rem !important;
-        margin-top: 2px !important;
-        margin-bottom: 8px !important;
+        font-size: 0.92rem !important;
+        margin-top: 4px !important;
+        margin-bottom: 10px !important;
         color: #222222 !important;
         text-align: center !important;
     }
 
-    /* 緊湊型靜心金句框 */
+    /* 靜心金句框 (適度內距) */
     .quote-box {
         background-color: #F5EBE1;
         border-radius: 14px;
-        padding: 10px 14px;
-        margin: 8px 0;
-        font-size: 0.95rem;
+        padding: 12px 16px;
+        margin: 10px 0;
+        font-size: 0.98rem;
         font-weight: 800;
         color: #3D2C2E;
-        line-height: 1.4;
+        line-height: 1.45;
         box-shadow: 0 2px 6px rgba(0,0,0,0.03);
     }
 
@@ -61,23 +61,23 @@ st.markdown("""
         border: none !important;
         font-weight: 900 !important;
         font-size: 0.95rem !important;
-        padding: 0.4rem 0.8rem !important;
+        padding: 0.5rem 1rem !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
         text-align: center !important;
         justify-content: center !important;
     }
 
-    /* 緊湊型 AI 指引區塊 */
+    /* AI 指引區塊 (適度間距) */
     .stSuccess {
         background-color: #EAF2E8 !important;
         color: #1B3B1E !important;
         border-radius: 12px !important;
         border: 1px solid #D2E3CF !important;
-        padding: 10px 12px !important;
-        margin-top: 6px !important;
-        margin-bottom: 8px !important;
+        padding: 12px 14px !important;
+        margin-top: 8px !important;
+        margin-bottom: 12px !important;
         text-align: left !important;
-        font-size: 0.9rem !important;
+        font-size: 0.92rem !important;
     }
 
     /* 隱藏原生選單、頁尾及右下角官方浮動工具列 */
@@ -88,23 +88,23 @@ st.markdown("""
         display: none !important;
     }
 
-    /* 手機端與桌面端容器優化 */
+    /* 手機端容器優化 (底部預留足夠空間) */
     .block-container {
-        padding-top: 0.5rem !important;
-        padding-bottom: 0.5rem !important;
+        padding-top: 0.8rem !important;
+        padding-bottom: 1.5rem !important;
         max-width: 390px !important;
         margin: 0 auto !important;
     }
 
-    /* 縮減欄位與分割線邊距 */
+    /* 調整元件之間的垂直間距 */
     [data-testid="stVerticalBlock"] {
-        gap: 0.4rem !important;
+        gap: 0.8rem !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# 渲染圖片 (預設調小至 230px 以節省縱向空間)
-def render_centered_image(image_name, max_width=230):
+# 渲染圖片 (合適比例 240px)
+def render_centered_image(image_name, max_width=240):
     possible_paths = [
         image_name,
         os.path.join("cards", image_name)
@@ -121,7 +121,7 @@ def render_centered_image(image_name, max_width=230):
             encoded_string = base64.b64encode(image_file.read()).decode()
         st.markdown(
             f"""
-            <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 4px auto;">
+            <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 6px auto;">
                 <img src="data:image/png;base64,{encoded_string}" style="max-width: {max_width}px; width: 100%; height: auto; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: block; margin: 0 auto;">
             </div>
             """,
@@ -156,7 +156,7 @@ if st.session_state.page == 0:
     st.markdown("<h1>✨ 333radiance 靜心空間</h1>", unsafe_allow_html=True)
     st.markdown("<p>外面的世界或有紛擾，這裡為你留有一處安全空間。</p>", unsafe_allow_html=True)
     
-    render_centered_image("card_001.png", max_width=230)
+    render_centered_image("card_001.png", max_width=240)
     
     st.write("")
     
@@ -178,7 +178,7 @@ elif st.session_state.page == 1:
     card_filename = f"{card['card_id']}.png"
     
     # 顯示圖片
-    render_centered_image(card_filename, max_width=230)
+    render_centered_image(card_filename, max_width=240)
     
     # 解析並顯示金句
     if 'quote_text' in quote:

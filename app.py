@@ -5,46 +5,69 @@ from openai import OpenAI
 # 頁面基礎設定
 st.set_page_config(page_title="333radiance 靜心空間", page_icon="✨", layout="centered")
 
-# 注入 CSS：引入日系柔和圓體、調整文字顏色與圖片居中滿版
+# 華德福色彩與版面注入 (網頁背景暖白、標題縮小、文字純黑)
 st.markdown("""
     <style>
-    /* 引入 Google 柔和圓體字型 */
-    @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Zen+MaruGothic:wght@400;500;700&display=swap');
 
-    /* 套用全站字型與柔和深棕字色 */
-    html, body, [class*="st-"], .stMarkdown {
+    /* 強制整體背景為華德福暖奶油白 */
+    .stApp {
+        background-color: #FAF6EE !important;
+    }
+
+    /* 統一字型與黑字設定，確保高對比清晰度 */
+    html, body, [class*="st-"], .stMarkdown, p, span, div {
         font-family: 'Zen Maru Gothic', sans-serif !important;
-        color: #333333;
+        color: #1F1F1F !important;
     }
 
-    /* 隱藏原生頁尾與頂部選單 */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    .stAppHeader {display: none;}
-    
-    /* 縮減手機版上下空白，減少滑動需求 */
-    .block-container {
-        padding-top: 1.5rem !important;
-        padding-bottom: 1rem !important;
-        max-width: 450px !important; /* 限制手機閱讀最佳寬度 */
+    /* 大標題改細、改小 */
+    h1, .stTitle {
+        font-size: 1.35rem !important;
+        font-weight: 700 !important;
+        color: #222222 !important;
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.3rem !important;
     }
-    
-    /* 圖片修正：置中並限制最大寬度，確保不會變形或過大 */
+
+    /* 華德福暖沙色按鈕 */
+    .stButton>button, .stLinkButton>a {
+        border-radius: 20px !important;
+        background-color: #EAD8C8 !important;
+        color: #222222 !important;
+        border: none !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    }
+
+    /* AI 指引區塊：華德福草本淡綠 */
+    .stSuccess {
+        background-color: #EAF2E8 !important;
+        color: #1B3B1E !important;
+        border-radius: 14px !important;
+        border: 1px solid #D2E3CF !important;
+    }
+
+    /* 隱藏原生選單與頁尾 */
+    #MainMenu, footer, header, .stAppHeader {
+        display: none !important;
+    }
+
+    /* 手機螢幕寬度與圖片佈局優化 */
+    .block-container {
+        padding-top: 1.2rem !important;
+        padding-bottom: 1rem !important;
+        max-width: 410px !important;
+    }
+
     img {
         width: 100% !important;
-        max-width: 320px !important; /* 適合手機的卡片寬度 */
+        max-width: 280px !important;
         height: auto !important;
         margin: 0 auto !important;
         display: block !important;
         border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    }
-
-    /* 按鈕圓角樣式 */
-    .stButton>button {
-        border-radius: 20px !important;
-        padding: 10px 20px !important;
     }
     </style>
 """, unsafe_allow_html=True)

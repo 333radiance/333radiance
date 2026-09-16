@@ -5,28 +5,46 @@ from openai import OpenAI
 # 頁面基礎設定
 st.set_page_config(page_title="333radiance 靜心空間", page_icon="✨", layout="centered")
 
-# CSS 優化：隱藏 Streamlit 頁尾、縮減上下邊距、限制圖片高度以適應手機單頁
+# 注入 CSS：引入日系柔和圓體、調整文字顏色與圖片居中滿版
 st.markdown("""
     <style>
+    /* 引入 Google 柔和圓體字型 */
+    @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+
+    /* 套用全站字型與柔和深棕字色 */
+    html, body, [class*="st-"], .stMarkdown {
+        font-family: 'Zen Maru Gothic', sans-serif !important;
+        color: #333333;
+    }
+
+    /* 隱藏原生頁尾與頂部選單 */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     .stAppHeader {display: none;}
     
-    /* 縮減邊距，避免滑動 */
+    /* 縮減手機版上下空白，減少滑動需求 */
     .block-container {
-        padding-top: 1rem !important;
+        padding-top: 1.5rem !important;
         padding-bottom: 1rem !important;
+        max-width: 450px !important; /* 限制手機閱讀最佳寬度 */
     }
     
-    /* 限制圖片最大高度為手機螢幕 40% */
+    /* 圖片修正：置中並限制最大寬度，確保不會變形或過大 */
     img {
-        max-height: 40vh !important;
-        width: auto !important;
-        margin: 0 auto;
-        display: block;
+        width: 100% !important;
+        max-width: 320px !important; /* 適合手機的卡片寬度 */
+        height: auto !important;
+        margin: 0 auto !important;
+        display: block !important;
         border-radius: 16px;
-        object-fit: contain;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    /* 按鈕圓角樣式 */
+    .stButton>button {
+        border-radius: 20px !important;
+        padding: 10px 20px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -41,7 +59,7 @@ try:
 except Exception:
     df = None
 
-# 初始化頁面狀態 (0: 首頁, 1: 抽卡結果頁)
+# 初始化頁面狀態
 if "page" not in st.session_state:
     st.session_state.page = 0
 
@@ -52,11 +70,10 @@ if st.session_state.page == 0:
     st.title("✨ 333radiance 靜心陪伴空間")
     st.write("外面的世界或有紛擾，這裡為你留有一處安全空間。")
     
-    # 直接讀取根目錄的圖檔
     try:
         st.image("card_001.png", use_container_width=True)
     except Exception:
-        st.info("🖼️ 請確保已上傳 card_001.png 至 GitHub")
+        st.info("🖼️ 請確保已上傳 card_001.png")
     
     st.write("")
     
@@ -73,13 +90,12 @@ if st.session_state.page == 0:
 # ==========================================
 elif st.session_state.page == 1:
     card = st.session_state.selected_card
-    
-    # 修正：直接使用根目錄檔名（不加 images/ 前綴）
     card_filename = f"{card['card_id']}.png"
+    
     try:
         st.image(card_filename, use_container_width=True)
     except Exception:
-        st.warning(f"請確保 GitHub 根目錄已上傳 {card_filename}")
+        st.warning(f"請確保已上傳 {card_filename}")
     
     # 呼叫 DeepSeek API
     api_key = st.secrets.get("DEEPSEEK_API_KEY", "")

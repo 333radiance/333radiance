@@ -37,7 +37,7 @@ if st.session_state.page == 0:
     
     # 顯示封面圖
     try:
-        st.image("cover.png", use_container_width=True)
+        st.image("card_001.png", use_container_width=True)
     except Exception:
         st.info("🖼️ （請在上傳封面圖至 GitHub，檔名設為 cover.png）")
     

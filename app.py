@@ -111,9 +111,7 @@ if "page" not in st.session_state:
 if st.session_state.page == 0:
     # 標題與副標題 (CSS 已設定為置中)
     st.markdown("<h1>✨ 333radiance 靜心陪伴空間</h1>", unsafe_allow_html=True)
-    st.markdown("<p>我們並非每一天都過得順心，外面的世界未必總是對你溫柔。
-當陷入低谷時，我們會需要一些啟發及溫暖。
-來，為今天的自己抽張卡片吧，好好收穫一份專屬於你的力量。</p>", unsafe_allow_html=True)
+    st.markdown("<p>我們並非每一天都過得順心，外面的世界未必總是對你溫柔。當陷入低谷時，我們會需要一些啟發及溫暖。來，為今天的自己抽張卡片吧，好好收穫一份專屬於你的力量。</p>", unsafe_allow_html=True)
     
     # 圖片 (CSS 已設定為置中)
     try:

@@ -5,25 +5,25 @@ from openai import OpenAI
 # 頁面基礎設定
 st.set_page_config(page_title="333radiance 靜心空間", page_icon="✨", layout="centered")
 
-# 華德福色彩 + 昭源圓體特粗 + 所有圖片與元素完全置中
+# 華德福色彩 + Chiron GoRound TC 特粗體 + 全元素置中
 st.markdown("""
     <style>
-    /* 引入昭源圓體 (Chiron GoRound HK/TC) 特粗字型 */
-    @import url('https://fonts.googleapis.com/css2?family=Chiron+GoRound+HK:wght@700;800;900&display=swap');
+    /* 引入 Chiron GoRound TC 特粗字型 */
+    @import url('https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@700;800;900&display=swap');
 
     /* 強制整體背景為華德福暖奶油白 */
     .stApp {
         background-color: #FAF6EE !important;
     }
 
-    /* 統一字型為昭源圓體特粗 */
+    /* 統一字型為 Chiron GoRound TC 特粗 */
     html, body, [class*="st-"], .stMarkdown, p, span, div, h1, h2, h3, button, a {
-        font-family: 'Chiron GoRound TC', 'Chiron GoRound HK', sans-serif !important;
+        font-family: 'Chiron GoRound TC', sans-serif !important;
         font-weight: 800 !important;
         color: #1F1F1F !important;
     }
 
-    /* 文字置中對齊 */
+    /* 文字完全置中對齊 */
     .stMarkdown div, h1, p {
         text-align: center !important;
     }
@@ -45,7 +45,7 @@ st.markdown("""
         color: #222222 !important;
     }
 
-    /* 核心修正：強制 Streamlit 所有圖片容器 (stImage) 與圖片本身 100% 完全置中 */
+    /* 強制所有圖片容器與圖片完全置中 */
     div[data-testid="stImage"] {
         display: flex !important;
         justify-content: center !important;

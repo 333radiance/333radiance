@@ -1,23 +1,21 @@
 import streamlit as st
 import pandas as pd
 import base64
+import os
 from openai import OpenAI
 
 # 頁面基礎設定
 st.set_page_config(page_title="333radiance 靜心空間", page_icon="✨", layout="centered")
 
-# 華德福色彩 + Chiron GoRound TC 特粗體 + 版面完全置中
+# 華德福色彩 + Chiron GoRound TC 特粗體
 st.markdown("""
     <style>
-    /* 引入 Chiron GoRound TC / HK 特粗字型 */
     @import url('https://fonts.googleapis.com/css2?family=Chiron+GoRound+HK:wght@800;900&family=Chiron+GoRound+TC:wght@800;900&display=swap');
 
-    /* 強制整體背景為華德福暖奶油白 */
     .stApp {
         background-color: #FAF6EE !important;
     }
 
-    /* 全局套用 Chiron GoRound TC 特粗字體與深黑字色 */
     html, body, [class*="st-"], .stMarkdown, p, span, div, h1, h2, h3, button, a {
         font-family: 'Chiron GoRound TC', 'Chiron GoRound HK', sans-serif !important;
         font-weight: 900 !important;
@@ -25,7 +23,6 @@ st.markdown("""
         text-align: center !important;
     }
     
-    /* 大標題設定 */
     h1, .stTitle {
         font-size: 1.4rem !important;
         font-weight: 900 !important;
@@ -35,7 +32,6 @@ st.markdown("""
         text-align: center !important;
     }
 
-    /* 副標題設定 */
     p {
         font-size: 0.95rem !important;
         margin-top: 5px !important;
@@ -44,7 +40,19 @@ st.markdown("""
         text-align: center !important;
     }
 
-    /* 華德福暖沙色特粗按鈕 */
+    /* 靜心金句框 */
+    .quote-box {
+        background-color: #F5EBE1;
+        border-radius: 16px;
+        padding: 16px 20px;
+        margin: 15px 0;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #3D2C2E;
+        line-height: 1.5;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+
     .stButton>button, .stLinkButton>a {
         border-radius: 20px !important;
         background-color: #EAD8C8 !important;
@@ -57,7 +65,6 @@ st.markdown("""
         justify-content: center !important;
     }
 
-    /* AI 指引區塊：華德福草本淡綠（保持靠左閱讀） */
     .stSuccess {
         background-color: #EAF2E8 !important;
         color: #1B3B1E !important;
@@ -66,25 +73,34 @@ st.markdown("""
         text-align: left !important;
     }
 
-    /* 隱藏原生選單與頁尾 */
     #MainMenu, footer, header, .stAppHeader {
         display: none !important;
     }
 
-    /* 桌面端與手機端容器置中設定 */
     .block-container {
         padding-top: 1rem !important;
         padding-bottom: 1rem !important;
         max-width: 410px !important;
-        margin: 0 auto !important; /* 確保電腦觀看時整體容器置中 */
+        margin: 0 auto !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# 使用 Base64 行內 CSS 確保圖片絕對置中
-def render_centered_image(image_path, max_width=280):
-    try:
-        with open(image_path, "rb") as image_file:
+# 置中渲染圖片 (自動相容根目錄或 cards/ 資料夾)
+def render_centered_image(image_name, max_width=280):
+    possible_paths = [
+        image_name,
+        os.path.join("cards", image_name)
+    ]
+    
+    target_path = None
+    for path in possible_paths:
+        if os.path.exists(path):
+            target_path = path
+            break
+
+    if target_path:
+        with open(target_path, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode()
         st.markdown(
             f"""
@@ -94,20 +110,17 @@ def render_centered_image(image_path, max_width=280):
             """,
             unsafe_allow_html=True
         )
-    except Exception:
-        st.warning(f"請確保 GitHub 根目錄已上傳 {image_path}")
+    else:
+        st.warning(f"請確保 GitHub 根目錄或 cards/ 資料夾已上傳 {image_name}")
 
-# 讀取卡片資料
-@st.cache_data
-def load_cards():
-    return pd.read_csv("cards.csv")
+# 讀取 CSV 資料
+def load_data():
+    cards_df = pd.read_csv("cards.csv") if os.path.exists("cards.csv") else None
+    quotes_df = pd.read_csv("quotes.csv") if os.path.exists("quotes.csv") else None
+    return cards_df, quotes_df
 
-try:
-    df = load_cards()
-except Exception:
-    df = None
+df_cards, df_quotes = load_data()
 
-# 初始化頁面狀態
 if "page" not in st.session_state:
     st.session_state.page = 0
 
@@ -122,35 +135,44 @@ if st.session_state.page == 0:
     
     st.write("")
     
-    if st.button("✨ 抽一張靜心卡", use_container_width=True):
-        if df is not None:
-            st.session_state.selected_card = df.sample(1).iloc[0]
+    if st.button("✨ 抽一張靜心卡與金句", use_container_width=True):
+        if df_cards is not None and df_quotes is not None:
+            # 隨機抽取 1 張卡片與 1 條金句
+            st.session_state.selected_card = df_cards.sample(1).iloc[0]
+            st.session_state.selected_quote = df_quotes.sample(1).iloc[0]
             st.session_state.page = 1
             st.rerun()
         else:
-            st.error("請確保 GitHub 上已建立 cards.csv")
+            st.error("請確認 GitHub 已建立 cards.csv 與 quotes.csv")
 
 # ==========================================
 # 畫面 2：抽卡結果頁
 # ==========================================
 elif st.session_state.page == 1:
     card = st.session_state.selected_card
+    quote = st.session_state.selected_quote
     card_filename = f"{card['card_id']}.png"
     
+    # 顯示抽出的圖片
     render_centered_image(card_filename, max_width=280)
     
-    # 呼叫 DeepSeek API
+    # 顯示抽出的金句
+    quote_text = quote.get('quote_text', '')
+    st.markdown(f'<div class="quote-box">「 {quote_text} 」</div>', unsafe_allow_html=True)
+    
+    # DeepSeek API 指引生成
     api_key = st.secrets.get("DEEPSEEK_API_KEY", "")
     if api_key:
         with st.spinner("陪伴員正在準備指引..."):
             try:
                 client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
-                context = card.get('prompt_context', '正在觀看這張靜心圖卡，需要休息與安心')
+                context = card.get('prompt_context', '正在觀看這張靜心圖卡')
                 
                 system_prompt = (
                     "你現在是 333radiance 的靜心陪伴員。"
-                    f"使用者現在{context}。"
-                    "請用 1 句話（20 字以內，必須使用香港繁體中文，必須書面語），給他一個引導視線聚焦或呼吸的指示。"
+                    f"使用者抽到的圖卡意境是：{context}。"
+                    f"使用者抽到的靜心金句是：「{quote_text}」。"
+                    "請用 1 句話（20 字以內，必須使用香港繁體中文，必須書面語），根據金句給他一個溫柔的呼吸或視線聚焦指示。"
                     "語氣溫柔，要10歲的小孩都可以理解的文字，不作任何醫療建議。"
                 )
 
@@ -173,7 +195,7 @@ elif st.session_state.page == 1:
     
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("🔄 再抽一張", use_container_width=True):
+        if st.button("🔄 再抽一次", use_container_width=True):
             st.session_state.page = 0
             st.rerun()
             

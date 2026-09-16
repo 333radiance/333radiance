@@ -5,7 +5,7 @@ from openai import OpenAI
 # 頁面基礎設定
 st.set_page_config(page_title="333radiance 靜心空間", page_icon="✨", layout="centered")
 
-# 華德福色彩 + Chiron GoRound TC 特粗體 + 全元素置中
+# 華德福色彩 + Chiron GoRound TC 特粗體 + 圖片強效深度置中
 st.markdown("""
     <style>
     /* 引入 Chiron GoRound TC 特粗字型 */
@@ -45,23 +45,29 @@ st.markdown("""
         color: #222222 !important;
     }
 
-    /* 強制所有圖片容器與圖片完全置中 */
-    div[data-testid="stImage"] {
+    /* 核心強效置中：覆蓋 Streamlit 所有圖片父階層級 */
+    .stImage, 
+    div[data-testid="stImage"], 
+    div[data-testid="stImage"] > div,
+    div[data-testid="stElementContainer"]:has(div[data-testid="stImage"]) {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
-        margin: 0 auto !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
 
-    div[data-testid="stImage"] > img, img {
-        width: 100% !important;
-        max-width: 280px !important;
-        height: auto !important;
-        margin: 0 auto !important;
+    /* 圖片本體樣式與置中 */
+    div[data-testid="stImage"] img, img {
         display: block !important;
-        border-radius: 16px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-left: auto !important;
+        margin-right: auto !important;
+        max-width: 280px !important;
+        width: 100% !important;
+        height: auto !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
     }
 
     /* 華德福暖沙色按鈕 */
@@ -122,7 +128,7 @@ if st.session_state.page == 0:
     st.markdown("<p>外面的世界或有紛擾，這裡為你留有一處安全空間。</p>", unsafe_allow_html=True)
     
     try:
-        st.image("card_001.png", use_container_width=True)
+        st.image("card_001.png")
     except Exception:
         st.info("🖼️ 請確保已上傳 card_001.png")
     
@@ -144,7 +150,7 @@ elif st.session_state.page == 1:
     card_filename = f"{card['card_id']}.png"
     
     try:
-        st.image(card_filename, use_container_width=True)
+        st.image(card_filename)
     except Exception:
         st.warning(f"請確保已上傳 {card_filename}")
     

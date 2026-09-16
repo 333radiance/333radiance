@@ -5,40 +5,67 @@ from openai import OpenAI
 # 頁面基礎設定
 st.set_page_config(page_title="333radiance 靜心空間", page_icon="✨", layout="centered")
 
-# 華德福色彩與版面注入 (網頁背景暖白、標題縮小、文字純黑)
+# 華德福色彩 + 元素全置中對齊 + 柔和圓體字型
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Zen+MaruGothic:wght@400;500;700&display=swap');
+    /* 引入柔和圓體字型 */
+    @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
 
     /* 強制整體背景為華德福暖奶油白 */
     .stApp {
         background-color: #FAF6EE !important;
     }
 
-    /* 統一字型與黑字設定，確保高對比清晰度 */
-    html, body, [class*="st-"], .stMarkdown, p, span, div {
+    /* 統一字型與純黑字色，提升對比度 */
+    html, body, [class*="st-"], .stMarkdown, p, span, div, h1, h2, h3, button, a {
         font-family: 'Zen Maru Gothic', sans-serif !important;
         color: #1F1F1F !important;
     }
 
-    /* 大標題改細、改小 */
+    /* 標題與副標題：縮小並強制置中對齊 */
+    .stMarkdown div, h1, p {
+        text-align: center !important;
+    }
+    
+    /* 大標題微調大小 */
     h1, .stTitle {
-        font-size: 1.35rem !important;
+        font-size: 1.4rem !important;
         font-weight: 700 !important;
-        color: #222222 !important;
-        padding-top: 0.5rem !important;
-        padding-bottom: 0.3rem !important;
+        padding-top: 0.2rem !important;
+        padding-bottom: 0.2rem !important;
+        margin-bottom: 0px !important;
     }
 
-    /* 華德福暖沙色按鈕 */
+    /* 副標題（外面的世界或有紛擾...）微調間距 */
+    p {
+        font-size: 0.95rem !important;
+        margin-top: 5px !important;
+        margin-bottom: 15px !important;
+        color: #333333 !important;
+    }
+
+    /* 圖片設定：置中並限制大小 */
+    img {
+        width: 100% !important;
+        max-width: 280px !important;
+        height: auto !important;
+        margin: 0 auto !important;
+        display: block !important;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    /* 華德福暖沙色按鈕 (包含「✨ 抽一張靜心卡」) */
     .stButton>button, .stLinkButton>a {
         border-radius: 20px !important;
         background-color: #EAD8C8 !important;
-        color: #222222 !important;
+        color: #1F1F1F !important;
         border: none !important;
         font-weight: 700 !important;
-        font-size: 0.95rem !important;
+        font-size: 1rem !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+        text-align: center !important;
+        justify-content: center !important;
     }
 
     /* AI 指引區塊：華德福草本淡綠 */
@@ -47,6 +74,7 @@ st.markdown("""
         color: #1B3B1E !important;
         border-radius: 14px !important;
         border: 1px solid #D2E3CF !important;
+        text-align: left !important; /* AI 文字保持靠左閱讀較舒適 */
     }
 
     /* 隱藏原生選單與頁尾 */
@@ -56,18 +84,9 @@ st.markdown("""
 
     /* 手機螢幕寬度與圖片佈局優化 */
     .block-container {
-        padding-top: 1.2rem !important;
+        padding-top: 1rem !important;
         padding-bottom: 1rem !important;
         max-width: 410px !important;
-    }
-
-    img {
-        width: 100% !important;
-        max-width: 280px !important;
-        height: auto !important;
-        margin: 0 auto !important;
-        display: block !important;
-        border-radius: 16px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -90,9 +109,11 @@ if "page" not in st.session_state:
 # 畫面 1：首頁
 # ==========================================
 if st.session_state.page == 0:
-    st.title("✨ 333radiance 靜心陪伴空間")
-    st.write("外面的世界或有紛擾，這裡為你留有一處安全空間。")
+    # 標題與副標題 (CSS 已設定為置中)
+    st.markdown("<h1>✨ 333radiance 靜心陪伴空間</h1>", unsafe_allow_html=True)
+    st.markdown("<p>外面的世界或有紛擾，這裡為你留有一處安全空間。</p>", unsafe_allow_html=True)
     
+    # 圖片 (CSS 已設定為置中)
     try:
         st.image("card_001.png", use_container_width=True)
     except Exception:

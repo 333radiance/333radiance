@@ -1,30 +1,27 @@
 import streamlit as st
 import pandas as pd
+import base64
 from openai import OpenAI
 
 # 頁面基礎設定
 st.set_page_config(page_title="333radiance 靜心空間", page_icon="✨", layout="centered")
 
-# 華德福色彩 + Chiron GoRound TC 特粗體 + 圖片強效深度置中
+# 華德福色彩 + Chiron GoRound TC 特粗體 + 版面完全置中
 st.markdown("""
     <style>
-    /* 引入 Chiron GoRound TC 特粗字型 */
-    @import url('https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@700;800;900&display=swap');
+    /* 引入 Chiron GoRound TC / HK 特粗字型 */
+    @import url('https://fonts.googleapis.com/css2?family=Chiron+GoRound+HK:wght@800;900&family=Chiron+GoRound+TC:wght@800;900&display=swap');
 
     /* 強制整體背景為華德福暖奶油白 */
     .stApp {
         background-color: #FAF6EE !important;
     }
 
-    /* 統一字型為 Chiron GoRound TC 特粗 */
+    /* 全局套用 Chiron GoRound TC 特粗字體與深黑字色 */
     html, body, [class*="st-"], .stMarkdown, p, span, div, h1, h2, h3, button, a {
-        font-family: 'Chiron GoRound TC', sans-serif !important;
-        font-weight: 800 !important;
+        font-family: 'Chiron GoRound TC', 'Chiron GoRound HK', sans-serif !important;
+        font-weight: 900 !important;
         color: #1F1F1F !important;
-    }
-
-    /* 文字完全置中對齊 */
-    .stMarkdown div, h1, p {
         text-align: center !important;
     }
     
@@ -35,6 +32,7 @@ st.markdown("""
         padding-top: 0.2rem !important;
         padding-bottom: 0.2rem !important;
         margin-bottom: 0px !important;
+        text-align: center !important;
     }
 
     /* 副標題設定 */
@@ -43,34 +41,10 @@ st.markdown("""
         margin-top: 5px !important;
         margin-bottom: 15px !important;
         color: #222222 !important;
+        text-align: center !important;
     }
 
-    /* 核心強效置中：覆蓋 Streamlit 所有圖片父階層級 */
-    .stImage, 
-    div[data-testid="stImage"], 
-    div[data-testid="stImage"] > div,
-    div[data-testid="stElementContainer"]:has(div[data-testid="stImage"]) {
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        width: 100% !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-    }
-
-    /* 圖片本體樣式與置中 */
-    div[data-testid="stImage"] img, img {
-        display: block !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-        max-width: 280px !important;
-        width: 100% !important;
-        height: auto !important;
-        border-radius: 16px !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
-    }
-
-    /* 華德福暖沙色按鈕 */
+    /* 華德福暖沙色特粗按鈕 */
     .stButton>button, .stLinkButton>a {
         border-radius: 20px !important;
         background-color: #EAD8C8 !important;
@@ -83,7 +57,7 @@ st.markdown("""
         justify-content: center !important;
     }
 
-    /* AI 指引區塊：華德福草本淡綠 */
+    /* AI 指引區塊：華德福草本淡綠（保持靠左閱讀） */
     .stSuccess {
         background-color: #EAF2E8 !important;
         color: #1B3B1E !important;
@@ -97,14 +71,31 @@ st.markdown("""
         display: none !important;
     }
 
-    /* 手機版邊距與最大寬度 */
+    /* 桌面端與手機端容器置中設定 */
     .block-container {
         padding-top: 1rem !important;
         padding-bottom: 1rem !important;
         max-width: 410px !important;
+        margin: 0 auto !important; /* 確保電腦觀看時整體容器置中 */
     }
     </style>
 """, unsafe_allow_html=True)
+
+# 使用 Base64 行內 CSS 確保圖片絕對置中
+def render_centered_image(image_path, max_width=280):
+    try:
+        with open(image_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode()
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 10px auto;">
+                <img src="data:image/png;base64,{encoded_string}" style="max-width: {max_width}px; width: 100%; height: auto; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: block; margin: 0 auto;">
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    except Exception:
+        st.warning(f"請確保 GitHub 根目錄已上傳 {image_path}")
 
 # 讀取卡片資料
 @st.cache_data
@@ -127,10 +118,7 @@ if st.session_state.page == 0:
     st.markdown("<h1>✨ 333radiance 靜心陪伴空間</h1>", unsafe_allow_html=True)
     st.markdown("<p>外面的世界或有紛擾，這裡為你留有一處安全空間。</p>", unsafe_allow_html=True)
     
-    try:
-        st.image("card_001.png")
-    except Exception:
-        st.info("🖼️ 請確保已上傳 card_001.png")
+    render_centered_image("card_001.png", max_width=280)
     
     st.write("")
     
@@ -149,10 +137,7 @@ elif st.session_state.page == 1:
     card = st.session_state.selected_card
     card_filename = f"{card['card_id']}.png"
     
-    try:
-        st.image(card_filename)
-    except Exception:
-        st.warning(f"請確保已上傳 {card_filename}")
+    render_centered_image(card_filename, max_width=280)
     
     # 呼叫 DeepSeek API
     api_key = st.secrets.get("DEEPSEEK_API_KEY", "")

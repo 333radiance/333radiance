@@ -111,12 +111,20 @@ def render_centered_image(image_name, max_width=280):
             unsafe_allow_html=True
         )
     else:
-        st.warning(f"請確保 GitHub 根目錄或 cards/ 資料夾已上傳 {image_name}")
+        st.warning(f"請確保已上傳 {image_name}")
 
-# 讀取 CSV 資料
+# 強制讀取 CSV (自動相容 UTF-8 編碼)
 def load_data():
-    cards_df = pd.read_csv("cards.csv") if os.path.exists("cards.csv") else None
-    quotes_df = pd.read_csv("quotes.csv") if os.path.exists("quotes.csv") else None
+    try:
+        cards_df = pd.read_csv("cards.csv", encoding="utf-8-sig") if os.path.exists("cards.csv") else None
+    except Exception:
+        cards_df = pd.read_csv("cards.csv") if os.path.exists("cards.csv") else None
+
+    try:
+        quotes_df = pd.read_csv("quotes.csv", encoding="utf-8-sig") if os.path.exists("quotes.csv") else None
+    except Exception:
+        quotes_df = pd.read_csv("quotes.csv") if os.path.exists("quotes.csv") else None
+
     return cards_df, quotes_df
 
 df_cards, df_quotes = load_data()
@@ -137,7 +145,6 @@ if st.session_state.page == 0:
     
     if st.button("✨ 抽一張靜心卡與金句", use_container_width=True):
         if df_cards is not None and df_quotes is not None:
-            # 隨機抽取 1 張卡片與 1 條金句
             st.session_state.selected_card = df_cards.sample(1).iloc[0]
             st.session_state.selected_quote = df_quotes.sample(1).iloc[0]
             st.session_state.page = 1
@@ -156,8 +163,12 @@ elif st.session_state.page == 1:
     # 顯示抽出的圖片
     render_centered_image(card_filename, max_width=280)
     
-    # 顯示抽出的金句
-    quote_text = quote.get('quote_text', '')
+    # 解析並顯示金句內容
+    if 'quote_text' in quote:
+        quote_text = str(quote['quote_text'])
+    else:
+        quote_text = str(quote.iloc[-1])
+        
     st.markdown(f'<div class="quote-box">「 {quote_text} 」</div>', unsafe_allow_html=True)
     
     # DeepSeek API 指引生成
@@ -169,11 +180,16 @@ elif st.session_state.page == 1:
                 context = card.get('prompt_context', '正在觀看這張靜心圖卡')
                 
                 system_prompt = (
-                    "你現在是 333radiance 的靜心陪伴員。"
-                    f"使用者抽到的圖卡意境是：{context}。"
-                    f"使用者抽到的靜心金句是：「{quote_text}」。"
-                    "請用 1 句話（20 字以內，必須使用香港繁體中文，必須書面語），根據金句給他一個溫柔的呼吸或視線聚焦指示。"
-                    "語氣溫柔，要10歲的小孩都可以理解的文字，不作任何醫療建議。"
+                    "你現在是 333radiance 的靜心陪伴員，風格溫暖、自然、和緩。\n\n"
+                    "【輸入資訊】\n"
+                    f"- 圖卡意境：{context}\n"
+                    f"- 靜心金句：{quote_text}\n\n"
+                    "【輸出要求】\n"
+                    "1. 內容：結合金句與圖卡意境，給予一句溫柔的呼吸或目光聚焦引導。\n"
+                    "2. 字數：嚴格控制在 30 字以內（2-3句話）。\n"
+                    "3. 語言規格：必須使用標準繁體中文（書面語）。\n"
+                    "4. 禁用詞彙：嚴禁使用任何粵語口語詞（如：唔、睇、望住、咗、嘅、咁）。\n"
+                    "5. 語氣：文字平易近人，連 10 歲小孩也能理解與放鬆，不作任何醫療建議。"
                 )
 
                 response = client.chat.completions.create(
@@ -182,7 +198,7 @@ elif st.session_state.page == 1:
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": "請給我一句靜心指示。"}
                     ],
-                    max_tokens=50,
+                    max_tokens=80,
                     temperature=0.7
                 )
                 

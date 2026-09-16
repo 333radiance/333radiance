@@ -7,7 +7,7 @@ from openai import OpenAI
 # 頁面基礎設定
 st.set_page_config(page_title="333radiance 靜心空間", page_icon="✨", layout="centered")
 
-# 華德福色彩 + Chiron GoRound TC 特粗體
+# 華德福色彩 + Chiron GoRound TC 特粗體 + 緊湊版面設定
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Chiron+GoRound+HK:wght@800;900&family=Chiron+GoRound+TC:wght@800;900&display=swap');
@@ -24,70 +24,87 @@ st.markdown("""
     }
     
     h1, .stTitle {
-        font-size: 1.4rem !important;
+        font-size: 1.3rem !important;
         font-weight: 900 !important;
-        padding-top: 0.2rem !important;
-        padding-bottom: 0.2rem !important;
+        padding-top: 0.1rem !important;
+        padding-bottom: 0.1rem !important;
         margin-bottom: 0px !important;
         text-align: center !important;
     }
 
     p {
-        font-size: 0.95rem !important;
-        margin-top: 5px !important;
-        margin-bottom: 15px !important;
+        font-size: 0.9rem !important;
+        margin-top: 2px !important;
+        margin-bottom: 8px !important;
         color: #222222 !important;
         text-align: center !important;
     }
 
-    /* 靜心金句框 */
+    /* 緊湊型靜心金句框 */
     .quote-box {
         background-color: #F5EBE1;
-        border-radius: 16px;
-        padding: 16px 20px;
-        margin: 15px 0;
-        font-size: 1.05rem;
+        border-radius: 14px;
+        padding: 10px 14px;
+        margin: 8px 0;
+        font-size: 0.95rem;
         font-weight: 800;
         color: #3D2C2E;
-        line-height: 1.5;
+        line-height: 1.4;
         box-shadow: 0 2px 6px rgba(0,0,0,0.03);
     }
 
+    /* 華德福暖沙色按鈕 */
     .stButton>button, .stLinkButton>a {
-        border-radius: 20px !important;
+        border-radius: 18px !important;
         background-color: #EAD8C8 !important;
         color: #1F1F1F !important;
         border: none !important;
         font-weight: 900 !important;
-        font-size: 1rem !important;
+        font-size: 0.95rem !important;
+        padding: 0.4rem 0.8rem !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
         text-align: center !important;
         justify-content: center !important;
     }
 
+    /* 緊湊型 AI 指引區塊 */
     .stSuccess {
         background-color: #EAF2E8 !important;
         color: #1B3B1E !important;
-        border-radius: 14px !important;
+        border-radius: 12px !important;
         border: 1px solid #D2E3CF !important;
+        padding: 10px 12px !important;
+        margin-top: 6px !important;
+        margin-bottom: 8px !important;
         text-align: left !important;
+        font-size: 0.9rem !important;
     }
 
-    #MainMenu, footer, header, .stAppHeader {
+    /* 隱藏原生選單、頁尾及右下角官方浮動工具列 */
+    #MainMenu, footer, header, .stAppHeader,
+    [data-testid="stStatusWidget"],
+    [data-testid="manage-app-button"],
+    .stAppDeployButton {
         display: none !important;
     }
 
+    /* 手機端與桌面端容器優化 */
     .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 1rem !important;
-        max-width: 410px !important;
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+        max-width: 390px !important;
         margin: 0 auto !important;
+    }
+
+    /* 縮減欄位與分割線邊距 */
+    [data-testid="stVerticalBlock"] {
+        gap: 0.4rem !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# 置中渲染圖片 (自動相容根目錄或 cards/ 資料夾)
-def render_centered_image(image_name, max_width=280):
+# 渲染圖片 (預設調小至 230px 以節省縱向空間)
+def render_centered_image(image_name, max_width=230):
     possible_paths = [
         image_name,
         os.path.join("cards", image_name)
@@ -104,8 +121,8 @@ def render_centered_image(image_name, max_width=280):
             encoded_string = base64.b64encode(image_file.read()).decode()
         st.markdown(
             f"""
-            <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 10px auto;">
-                <img src="data:image/png;base64,{encoded_string}" style="max-width: {max_width}px; width: 100%; height: auto; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: block; margin: 0 auto;">
+            <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin: 4px auto;">
+                <img src="data:image/png;base64,{encoded_string}" style="max-width: {max_width}px; width: 100%; height: auto; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); display: block; margin: 0 auto;">
             </div>
             """,
             unsafe_allow_html=True
@@ -113,7 +130,7 @@ def render_centered_image(image_name, max_width=280):
     else:
         st.warning(f"請確保已上傳 {image_name}")
 
-# 強制讀取 CSV (自動相容 UTF-8 編碼)
+# 強制讀取 CSV
 def load_data():
     try:
         cards_df = pd.read_csv("cards.csv", encoding="utf-8-sig") if os.path.exists("cards.csv") else None
@@ -136,10 +153,10 @@ if "page" not in st.session_state:
 # 畫面 1：首頁
 # ==========================================
 if st.session_state.page == 0:
-    st.markdown("<h1>✨ 333radiance 靜心陪伴空間</h1>", unsafe_allow_html=True)
+    st.markdown("<h1>✨ 333radiance 靜心空間</h1>", unsafe_allow_html=True)
     st.markdown("<p>外面的世界或有紛擾，這裡為你留有一處安全空間。</p>", unsafe_allow_html=True)
     
-    render_centered_image("card_001.png", max_width=280)
+    render_centered_image("card_001.png", max_width=230)
     
     st.write("")
     
@@ -160,10 +177,10 @@ elif st.session_state.page == 1:
     quote = st.session_state.selected_quote
     card_filename = f"{card['card_id']}.png"
     
-    # 顯示抽出的圖片
-    render_centered_image(card_filename, max_width=280)
+    # 顯示圖片
+    render_centered_image(card_filename, max_width=230)
     
-    # 解析並顯示金句內容
+    # 解析並顯示金句
     if 'quote_text' in quote:
         quote_text = str(quote['quote_text'])
     else:
@@ -185,11 +202,11 @@ elif st.session_state.page == 1:
                     f"- 圖卡意境：{context}\n"
                     f"- 靜心金句：{quote_text}\n\n"
                     "【輸出要求】\n"
-                    "1. 內容：結合金句與圖卡意境，給予一句溫柔的指引，不可重複靜心金句。\n"
-                    "2. 字數：嚴格控制在 20-30 字以內（2-3句話）。\n"
+                    "1. 內容：結合金句與圖卡意境，給予一句溫柔的呼吸或目光聚焦引導。\n"
+                    "2. 字數：嚴格控制在 30 字以內（2-3句話）。\n"
                     "3. 語言規格：必須使用標準繁體中文（書面語）。\n"
                     "4. 禁用詞彙：嚴禁使用任何粵語口語詞（如：唔、睇、望住、咗、嘅、咁）。\n"
-                    "5. 語氣：文字平易近人，不作任何醫療建議。"
+                    "5. 語氣：文字平易近人，連 10 歲小孩也能理解與放鬆，不作任何醫療建議。"
                 )
 
                 response = client.chat.completions.create(
@@ -207,8 +224,6 @@ elif st.session_state.page == 1:
             except Exception as e:
                 st.error("系統繁忙中，請深深呼吸，好好照顧自己。")
 
-    st.divider()
-    
     col1, col2 = st.columns(2)
     with col1:
         if st.button("🔄 再抽一次", use_container_width=True):

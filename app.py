@@ -3,6 +3,10 @@ import pandas as pd
 import random
 import os
 from datetime import datetime
+import pytz
+from PIL import Image, ImageDraw, ImageFont
+import textwrap
+import io
 
 # 1. 頁面基本設定
 st.set_page_config(
@@ -12,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. 簡潔高質感 CSS 樣式 (使用系統預設字體，按鈕與排版完美對齊)
+# 2. 簡潔高質感 CSS 樣式
 st.markdown("""
     <style>
     /* 基礎背景與顏色 */
@@ -85,10 +89,10 @@ st.markdown("""
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
-        margin-top: 5px !important;
+        margin-top: 0px !important;
     }
 
-    /* 兩個按鈕外觀 100% 一致與漸變過渡效果 */
+    /* 按鈕外觀 100% 一致與漸變過渡效果 */
     div[data-testid="stButton"] button, a.ig-button {
         background-color: #38332F !important;
         color: #F9F6F0 !important;
@@ -103,8 +107,8 @@ st.markdown("""
         text-decoration: none !important;
         transition: all 0.3s ease !important;
         margin: 0 auto !important;
-        font-size: 1.05rem !important;
-        letter-spacing: 1.5px !important;
+        font-size: 1rem !important;
+        letter-spacing: 1px !important;
     }
 
     div[data-testid="stButton"] button p {
@@ -131,7 +135,6 @@ def load_data():
         greetings_df = pd.read_csv("greetings.csv") if os.path.exists("greetings.csv") else pd.DataFrame()
         return quotes_df, guides_df, greetings_df
     except Exception as e:
-        st.error("載入 CSV 資料庫時發生錯誤，請檢查檔案格式。")
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
 quotes_df, guides_df, greetings_df = load_data()
@@ -150,21 +153,22 @@ if 'selected_cover_path' not in st.session_state:
 if 'selected_image_path' not in st.session_state:
     st.session_state.selected_image_path = ""
 
+# 5. 香港時區日期計算
 def get_today_string():
-    now = datetime.now()
+    hk_tz = pytz.timezone('Asia/Hong_Kong')
+    now = datetime.now(hk_tz)
     weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日']
-    weekday_str = weekdays[now.weekday()]
-    return f"{now.year}年{now.month}月{now.day}日 {weekday_str}"
+    return f"{now.year}年{now.month}月{now.day}日 {weekdays[now.weekday()]}"
 
 def get_random_image_from_folder(folder_name):
     if os.path.exists(folder_name):
-        valid_extensions = ('.png', '.jpg', '.jpeg', '.webp', '.gif')
+        valid_extensions = ('.png', '.jpg', '.jpeg', '.webp')
         images = [f for f in os.listdir(folder_name) if f.lower().endswith(valid_extensions)]
         if images:
             return os.path.join(folder_name, random.choice(images))
     return ""
 
-# 5. 核心邏輯函數
+# 6. 核心邏輯函數
 def init_home_data():
     st.session_state.selected_cover_path = get_random_image_from_folder("covers")
     if not greetings_df.empty:
@@ -185,13 +189,42 @@ def reset_app():
     init_home_data()
     st.session_state.current_stage = 'home'
 
+# --- 圖片合成函數 (Pillow) ---
+def generate_share_image(image_path, quote_text):
+    try:
+        base_img = Image.open(image_path).convert("RGBA")
+    except Exception:
+        base_img = Image.new("RGBA", (1080, 1080), (249, 246, 240))
+    
+    base_img = base_img.resize((1080, 1080))
+    overlay = Image.new("RGBA", base_img.size, (0, 0, 0, 70))
+    combined = Image.alpha_composite(base_img, overlay)
+    
+    draw = ImageDraw.Draw(combined)
+    
+    font_path = "font.ttf"
+    try:
+        font = ImageFont.truetype(font_path, 42)
+        small_font = ImageFont.truetype(font_path, 28)
+    except IOError:
+        font = ImageFont.load_default()
+        small_font = ImageFont.load_default()
+
+    wrapped_text = textwrap.fill(quote_text, width=22)
+    
+    draw.text((100, 300), wrapped_text, fill=(255, 255, 255, 255), font=font, spacing=20)
+    draw.text((100, 920), "333 Radiance | 靜心空間", fill=(220, 220, 220, 200), font=small_font)
+    
+    output = io.BytesIO()
+    combined.convert("RGB").save(output, format="JPEG", quality=95)
+    return output.getvalue()
+
 if not st.session_state.selected_greeting:
     init_home_data()
 
-# 6. 介面渲染
+# 7. 介面渲染
 if st.session_state.current_stage == 'home':
     today_str = get_today_string()
-    
     st.markdown(f"<div class='date-text'>今日是 {today_str}</div>", unsafe_allow_html=True)
     
     if st.session_state.selected_cover_path and os.path.exists(st.session_state.selected_cover_path):
@@ -218,12 +251,22 @@ elif st.session_state.current_stage == 'result':
     
     st.write("---")
     
-    col1, col2 = st.columns(2)
+    # 三欄式佈局：換個視角、下載分享圖、關注 IG
+    col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("換個視角", use_container_width=True):
             reset_app()
             st.rerun()
     with col2:
+        img_bytes = generate_share_image(st.session_state.selected_image_path, st.session_state.selected_quote)
+        st.download_button(
+            label="下載分享圖",
+            data=img_bytes,
+            file_name="333_radiance_card.jpg",
+            mime="image/jpeg",
+            use_container_width=True
+        )
+    with col3:
         st.markdown("""
             <div class="ig-btn-container">
                 <a href="https://instagram.com" target="_blank" class="ig-button">

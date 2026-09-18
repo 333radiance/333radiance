@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. 高質感自訂 CSS 樣式 (溫暖、極簡、空間感)
+# 2. 高質感自訂 CSS 樣式
 st.markdown("""
     <style>
     /* 全局字體與背景 */
@@ -98,7 +98,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. 讀取本地資料庫 (使用快取提升載入速度)
+# 3. 讀取本地資料庫 
 @st.cache_data
 def load_data():
     try:
@@ -106,7 +106,7 @@ def load_data():
         guides_df = pd.read_csv("guides.csv")
         return quotes_df, guides_df
     except FileNotFoundError:
-        st.error("找不到 quotes.csv 或 guides.csv，請確保檔案已上傳至專案目錄。")
+        st.error("找不到 quotes.csv 或 guides.csv，請確保檔案已上傳。")
         return pd.DataFrame(), pd.DataFrame()
 
 quotes_df, guides_df = load_data()
@@ -118,8 +118,8 @@ if 'selected_quote' not in st.session_state:
     st.session_state.selected_quote = ""
 if 'selected_guide' not in st.session_state:
     st.session_state.selected_guide = ""
-if 'selected_image_id' not in st.session_state:
-    st.session_state.selected_image_id = 1
+if 'selected_image_path' not in st.session_state:
+    st.session_state.selected_image_path = ""
 
 # 獲取今日日期字串
 def get_today_string():
@@ -134,12 +134,20 @@ def draw_card():
     if not quotes_df.empty:
         st.session_state.selected_quote = random.choice(quotes_df['text'].tolist())
     
-    # 隨機抽取靜心引導 (不需再手動選擇，創造隨機的驚喜感)
+    # 隨機抽取靜心引導
     if not guides_df.empty:
         st.session_state.selected_guide = random.choice(guides_df['text'].tolist())
             
-    # 隨機抽取圖片 ID (假設有 1~99 張圖片)
-    st.session_state.selected_image_id = random.randint(1, 99)
+    # 智能隨機抽取圖片 (自動掃描 cards 資料夾內的任何圖片)
+    st.session_state.selected_image_path = ""
+    if os.path.exists("cards"):
+        valid_extensions = ('.png', '.jpg', '.jpeg', '.webp', '.gif')
+        # 找出所有符合副檔名的檔案
+        images = [f for f in os.listdir("cards") if f.lower().endswith(valid_extensions)]
+        if images:
+            # 隨機選一張並組合完整路徑
+            selected_image = random.choice(images)
+            st.session_state.selected_image_path = os.path.join("cards", selected_image)
     
     # 切換頁面狀態
     st.session_state.current_stage = 'result'
@@ -163,14 +171,11 @@ if st.session_state.current_stage == 'home':
             st.rerun()
 
 elif st.session_state.current_stage == 'result':
-    # 顯示圖片 
-    image_filename = f"cards/card_{st.session_state.selected_image_id:03d}.jpg"
-    
-    if os.path.exists(image_filename):
-        st.image(image_filename, use_container_width=True)
+    # 顯示圖片 (有找到圖片就顯示，找不到就顯示灰色提示框)
+    if st.session_state.selected_image_path and os.path.exists(st.session_state.selected_image_path):
+        st.image(st.session_state.selected_image_path, use_container_width=True)
     else:
-        # 無圖片時的質感佔位
-        st.markdown(f"<div style='text-align:center; padding:4rem; background:#E6E2DD; border-radius:12px; margin-bottom:2rem; color:#8A9A86;'>[ 靜心圖卡 {st.session_state.selected_image_id:03d} ]</div>", unsafe_allow_html=True)
+        st.markdown("<div style='text-align:center; padding:4rem; background:#E6E2DD; border-radius:12px; margin-bottom:2rem; color:#8A9A86;'>[ 請確保 cards 資料夾內有放入圖片檔 ]</div>", unsafe_allow_html=True)
     
     # 顯示金句 
     st.markdown(f"<div class='quote-text'>{st.session_state.selected_quote}</div>", unsafe_allow_html=True)

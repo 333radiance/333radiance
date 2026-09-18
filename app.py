@@ -12,17 +12,17 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. 高質感自訂 CSS 樣式 (強行載入 Chiron GoRound TC 特粗體與按鈕置中)
+# 2. 高質感自訂 CSS 樣式
 st.markdown("""
-    <!-- 引入 Chiron GoRound TC 官方 GitHub CDN 與 Google Fonts 備用網址 -->
+    <!-- 引入 Chiron GoRound TC 官方 GitHub CDN (包含常規體與特粗體) -->
     <style>
+    @import url('https://cdn.jsdelivr.net/gh/chiron-fonts/chiron-go-round-tc@v1.000/webfonts/ChironGoRoundTC-Regular.css');
     @import url('https://cdn.jsdelivr.net/gh/chiron-fonts/chiron-go-round-tc@v1.000/webfonts/ChironGoRoundTC-ExtraBold.css');
-    @import url('https://fonts.googleapis.com/css2?family=Chiron+GoRound+HK:wght@900&display=swap');
 
-    /* 全局強制套用 Chiron GoRound TC 特粗體 (Heavy / ExtraBold / 900) */
-    html, body, [class*="css"], .stApp, p, div, span, button, input {
+    /* 全局字體設定：強制套用 Chiron GoRound TC 常規體 (400) */
+    html, body, [class*="css"], .stApp, p, div, span, input {
         font-family: 'Chiron GoRound TC', 'Chiron GoRound HK', sans-serif !important;
-        font-weight: 900 !important;
+        font-weight: 400 !important;
         background-color: #F9F6F0;
         color: #38332F;
     }
@@ -32,8 +32,9 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* 首頁日期 */
+    /* 首頁日期 (特粗) */
     .date-text {
+        font-weight: 900 !important;
         text-align: center !important; 
         color: #8A9A86; 
         font-size: 1.05rem;
@@ -42,8 +43,9 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     
-    /* 首頁情境問候語 */
+    /* 首頁情境問候語 (特粗) */
     .welcome-text {
+        font-weight: 900 !important;
         text-align: center !important; 
         color: #38332F; 
         font-size: 1.15rem;
@@ -53,9 +55,10 @@ st.markdown("""
         padding: 0 1rem;
     }
     
-    /* 內文金句排版 (保持適度易讀性，同樣套用特粗體) */
+    /* === 第二頁排版優化 (字體調細 1-2 級) === */
     .quote-text {
-        font-size: 1rem;
+        font-weight: 400 !important; /* 恢復正常粗幼 */
+        font-size: 0.92rem !important; /* 字體微調縮小，更顯細緻 */
         line-height: 1.85;
         color: #2B2927;
         padding: 1.6rem;
@@ -64,12 +67,12 @@ st.markdown("""
         margin-top: 1.2rem;
         margin-bottom: 1.2rem;
         text-align: justify;
-        letter-spacing: 0.3px;
+        letter-spacing: 0.5px;
     }
     
-    /* 引導區塊 */
     .guide-box {
-        font-size: 0.95rem;
+        font-weight: 400 !important;
+        font-size: 0.88rem !important; /* 引導內文再細一點 */
         line-height: 1.75;
         color: #4A4541;
         padding: 1.2rem;
@@ -79,72 +82,50 @@ st.markdown("""
     }
     
     .guide-title {
-        font-size: 0.88rem;
+        font-weight: 900 !important;
+        font-size: 0.9rem !important;
         color: #8A9A86;
         margin-bottom: 0.6rem;
         letter-spacing: 1.5px;
     }
     
-    /* 【強行置中】針對 Streamlit 的元件容器進行 Flexbox 絕對置中 */
-    [data-testid="stColumn"], div.stButton, .element-container {
+    /* === 容器強制置中 === */
+    [data-testid="stColumn"], div.stButton, .ig-btn-container, .element-container {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
     }
 
-    /* 按鈕本體樣式 (Chiron GoRound TC 特粗體 + 絕對置中與邊距修正) */
-    div.stButton > button {
+    /* === 按鈕共用樣式 (確保 Streamlit 按鈕與 IG 按鈕 100% 一致) === */
+    div.stButton > button, .ig-button {
         font-family: 'Chiron GoRound TC', 'Chiron GoRound HK', sans-serif !important;
         font-weight: 900 !important;
         background-color: #38332F !important;
         color: #F9F6F0 !important;
         border: none !important;
         border-radius: 25px !important;
-        padding: 0.75rem 2.5rem !important;
+        height: 3.2rem !important; /* 統一固定高度 */
         font-size: 1.05rem !important;
         letter-spacing: 1.5px !important;
         margin: 0 auto !important;
-        display: block !important;
         width: 100% !important;
-        max-width: 260px !important;
-    }
-
-    div.stButton > button:hover {
-        background-color: #5A544D !important;
-        color: #ffffff !important;
-    }
-
-    /* 外連 IG 置中按鈕容器與本體 */
-    .ig-btn-container {
+        max-width: 240px !important; /* 統一最大寬度 */
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        width: 100% !important;
-    }
-
-    .ig-button {
-        font-family: 'Chiron GoRound TC', 'Chiron GoRound HK', sans-serif !important;
-        font-weight: 900 !important;
-        display: block !important;
-        width: 100% !important;
-        max-width: 260px !important;
-        text-align: center !important;
-        background-color: transparent !important;
-        color: #38332F !important;
-        border: 1.5px solid #38332F !important;
-        border-radius: 25px !important;
-        padding: 0.68rem 0 !important;
-        font-size: 1rem !important;
         text-decoration: none !important;
-        letter-spacing: 1px !important;
-        transition: all 0.3s ease !important;
-        margin: 0 auto !important;
+        /* 加入平滑漸變過渡效果 */
+        transition: background-color 0.4s ease, transform 0.3s ease, box-shadow 0.3s ease !important;
+        cursor: pointer !important;
     }
 
-    .ig-button:hover {
-        background-color: #38332F !important;
-        color: #F9F6F0 !important;
+    /* === 按鈕懸停漸變與浮動效果 === */
+    div.stButton > button:hover, .ig-button:hover {
+        background-color: #635C55 !important; /* 顏色平滑過渡變淺 */
+        color: #ffffff !important;
+        transform: translateY(-3px) !important; /* 微微上浮 */
+        box-shadow: 0 6px 15px rgba(56, 51, 47, 0.25) !important; /* 增加漸變陰影 */
     }
     </style>
 """, unsafe_allow_html=True)
@@ -226,7 +207,6 @@ if st.session_state.current_stage == 'home':
     
     st.markdown(f"<div class='welcome-text'>{st.session_state.selected_greeting}</div>", unsafe_allow_html=True)
     
-    # 現代化去迷信用語 + 絕對置中按鈕
     if st.button("開啟今日指引"):
         draw_card()
         st.rerun()
@@ -248,7 +228,7 @@ elif st.session_state.current_stage == 'result':
     
     st.write("---")
     
-    # 底部按鈕並排且雙雙絕對置中
+    # 底部按鈕排版
     col1, col2 = st.columns(2)
     with col1:
         if st.button("換個視角"):

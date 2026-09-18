@@ -12,31 +12,19 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. 終極排版與粗體 CSS (針對 IG 內建瀏覽器特化)
+# 2. 簡潔高質感 CSS 樣式 (使用系統預設字體，按鈕與排版完美對齊)
 st.markdown("""
     <style>
-    /* 引入 Chiron GoRound TC 與 Google Fonts 備用特粗體 */
-    @import url('https://cdn.jsdelivr.net/gh/chiron-fonts/chiron-go-round-tc@v1.000/webfonts/ChironGoRoundTC-ExtraBold.css');
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&display=swap');
-
-    /* =========================================
-       1. 強制全站特粗體 (包含完美 Fallback)
-       ========================================= */
-    * {
-        font-family: 'Chiron GoRound TC', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif !important;
-        font-weight: 900 !important;
-    }
-
+    /* 基礎背景與顏色 */
     html, body, .stApp {
         background-color: #F9F6F0 !important;
         color: #38332F !important;
     }
     
+    /* 隱藏預設 Streamlit 頂部與底部元素 */
     #MainMenu, footer, header {visibility: hidden;}
     
-    /* =========================================
-       2. 內文排版
-       ========================================= */
+    /* 日期與問候語 */
     .date-text {
         text-align: center !important; 
         color: #8A9A86; 
@@ -56,6 +44,7 @@ st.markdown("""
         padding: 0 1rem;
     }
     
+    /* 金句與引導區塊 */
     .quote-text {
         font-size: 1rem !important;
         line-height: 1.85;
@@ -83,11 +72,7 @@ st.markdown("""
         margin-bottom: 0.6rem;
     }
     
-    /* =========================================
-       3. 按鈕完美對齊與統一樣式
-       ========================================= */
-    
-    /* 精準控制 Streamlit 原生按鈕容器 */
+    /* 按鈕容器置中 */
     div[data-testid="stButton"] {
         display: flex !important;
         justify-content: center !important;
@@ -95,45 +80,44 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* IG 按鈕容器 */
     .ig-btn-container {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
-        margin-top: 5px !important; /* 增加手機版上下堆疊時的間距 */
+        margin-top: 5px !important;
     }
 
-    /* 確保兩個按鈕外觀 100% 一致 */
+    /* 兩個按鈕外觀 100% 一致與漸變過渡效果 */
     div[data-testid="stButton"] button, a.ig-button {
         background-color: #38332F !important;
         color: #F9F6F0 !important;
         border: none !important;
         border-radius: 30px !important;
         width: 100% !important;
-        max-width: 250px !important; /* 控制最大寬度 */
-        height: 50px !important;     /* 強制固定高度 */
+        max-width: 250px !important;
+        height: 50px !important;
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         text-decoration: none !important;
         transition: all 0.3s ease !important;
         margin: 0 auto !important;
+        font-size: 1.05rem !important;
+        letter-spacing: 1.5px !important;
     }
 
-    /* 強制 Streamlit 按鈕內的文字樣式 */
-    div[data-testid="stButton"] button p, a.ig-button {
+    div[data-testid="stButton"] button p {
         color: #F9F6F0 !important;
-        font-size: 1.1rem !important;
-        font-weight: 900 !important;
         margin: 0 !important;
         padding: 0 !important;
     }
 
-    /* 滑鼠懸停 / 點擊漸變效果 */
+    /* 滑鼠懸停浮動與漸變 */
     div[data-testid="stButton"] button:hover, a.ig-button:hover {
         background-color: #5A544D !important;
         transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(56, 51, 47, 0.2) !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -215,7 +199,6 @@ if st.session_state.current_stage == 'home':
     
     st.markdown(f"<div class='welcome-text'>{st.session_state.selected_greeting}</div>", unsafe_allow_html=True)
     
-    # 加上 use_container_width=True 強制展開
     if st.button("開啟今日指引", use_container_width=True):
         draw_card()
         st.rerun()
@@ -237,7 +220,6 @@ elif st.session_state.current_stage == 'result':
     
     col1, col2 = st.columns(2)
     with col1:
-        # 加上 use_container_width=True 徹底解決截圖中按鈕縮小的問題
         if st.button("換個視角", use_container_width=True):
             reset_app()
             st.rerun()

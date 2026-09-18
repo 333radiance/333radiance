@@ -12,15 +12,17 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. 高質感自訂 CSS 樣式 (載入 Chiron GoRound 特粗體與強制置中)
+# 2. 高質感自訂 CSS 樣式 (強行載入 Chiron GoRound TC 特粗體與按鈕置中)
 st.markdown("""
-    <!-- 載入 Chiron GoRound HK/TC (包含 400, 700, 900 特粗體) -->
+    <!-- 引入 Chiron GoRound TC 官方 GitHub CDN 與 Google Fonts 備用網址 -->
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Chiron+GoRound+HK:wght@400;700;900&display=swap');
+    @import url('https://cdn.jsdelivr.net/gh/chiron-fonts/chiron-go-round-tc@v1.000/webfonts/ChironGoRoundTC-ExtraBold.css');
+    @import url('https://fonts.googleapis.com/css2?family=Chiron+GoRound+HK:wght@900&display=swap');
 
-    /* 全局字體設定：優先使用 Chiron GoRound */
-    html, body, [class*="css"], .stApp {
-        font-family: 'Chiron GoRound HK', 'Chiron GoRound TC', 'PingFang HK', 'Microsoft JhengHei', sans-serif !important;
+    /* 全局強制套用 Chiron GoRound TC 特粗體 (Heavy / ExtraBold / 900) */
+    html, body, [class*="css"], .stApp, p, div, span, button, input {
+        font-family: 'Chiron GoRound TC', 'Chiron GoRound HK', sans-serif !important;
+        font-weight: 900 !important;
         background-color: #F9F6F0;
         color: #38332F;
     }
@@ -30,12 +32,6 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* 標題與重點文字強制使用 Chiron GoRound 特粗體 (900) */
-    h1, h2, h3, .guide-title, .date-text, .welcome-text {
-        font-family: 'Chiron GoRound HK', 'Chiron GoRound TC', sans-serif !important;
-        font-weight: 900 !important;
-    }
-
     /* 首頁日期 */
     .date-text {
         text-align: center !important; 
@@ -57,11 +53,10 @@ st.markdown("""
         padding: 0 1rem;
     }
     
-    /* 文字排版 */
+    /* 內文金句排版 (保持適度易讀性，同樣套用特粗體) */
     .quote-text {
-        font-size: 0.98rem;
+        font-size: 1rem;
         line-height: 1.85;
-        font-weight: 400;
         color: #2B2927;
         padding: 1.6rem;
         background-color: #F0EAE1;
@@ -72,7 +67,7 @@ st.markdown("""
         letter-spacing: 0.3px;
     }
     
-    /* 靜心引導排版 */
+    /* 引導區塊 */
     .guide-box {
         font-size: 0.95rem;
         line-height: 1.75;
@@ -90,17 +85,17 @@ st.markdown("""
         letter-spacing: 1.5px;
     }
     
-    /* --- 強制按鈕容器與本體置中 --- */
-    div.stButton {
+    /* 【強行置中】針對 Streamlit 的元件容器進行 Flexbox 絕對置中 */
+    [data-testid="stColumn"], div.stButton, .element-container {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
     }
 
-    /* Streamlit 原生按鈕覆蓋：Chiron GoRound 特粗體 (900) */
+    /* 按鈕本體樣式 (Chiron GoRound TC 特粗體 + 絕對置中與邊距修正) */
     div.stButton > button {
-        font-family: 'Chiron GoRound HK', 'Chiron GoRound TC', sans-serif !important;
+        font-family: 'Chiron GoRound TC', 'Chiron GoRound HK', sans-serif !important;
         font-weight: 900 !important;
         background-color: #38332F !important;
         color: #F9F6F0 !important;
@@ -120,7 +115,7 @@ st.markdown("""
         color: #ffffff !important;
     }
 
-    /* IG 按鈕容器置中 */
+    /* 外連 IG 置中按鈕容器與本體 */
     .ig-btn-container {
         display: flex !important;
         justify-content: center !important;
@@ -129,27 +124,27 @@ st.markdown("""
     }
 
     .ig-button {
-        font-family: 'Chiron GoRound HK', 'Chiron GoRound TC', sans-serif !important;
+        font-family: 'Chiron GoRound TC', 'Chiron GoRound HK', sans-serif !important;
         font-weight: 900 !important;
-        display: block;
-        width: 100%;
-        max-width: 260px;
-        text-align: center;
-        background-color: transparent;
-        color: #38332F;
-        border: 1.5px solid #38332F;
-        border-radius: 25px;
-        padding: 0.68rem 0;
-        font-size: 1rem;
-        text-decoration: none;
-        letter-spacing: 1px;
-        transition: all 0.3s ease;
-        margin: 0 auto;
+        display: block !important;
+        width: 100% !important;
+        max-width: 260px !important;
+        text-align: center !important;
+        background-color: transparent !important;
+        color: #38332F !important;
+        border: 1.5px solid #38332F !important;
+        border-radius: 25px !important;
+        padding: 0.68rem 0 !important;
+        font-size: 1rem !important;
+        text-decoration: none !important;
+        letter-spacing: 1px !important;
+        transition: all 0.3s ease !important;
+        margin: 0 auto !important;
     }
 
     .ig-button:hover {
-        background-color: #38332F;
-        color: #F9F6F0;
+        background-color: #38332F !important;
+        color: #F9F6F0 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -182,14 +177,12 @@ if 'selected_cover_path' not in st.session_state:
 if 'selected_image_path' not in st.session_state:
     st.session_state.selected_image_path = ""
 
-# 獲取今日日期字串
 def get_today_string():
     now = datetime.now()
     weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日']
     weekday_str = weekdays[now.weekday()]
     return f"{now.year}年{now.month}月{now.day}日 {weekday_str}"
 
-# 隨機取得資料夾中的圖片
 def get_random_image_from_folder(folder_name):
     if os.path.exists(folder_name):
         valid_extensions = ('.png', '.jpg', '.jpeg', '.webp', '.gif')
@@ -219,7 +212,6 @@ def reset_app():
     init_home_data()
     st.session_state.current_stage = 'home'
 
-# 首次載入首頁資料
 if not st.session_state.selected_greeting:
     init_home_data()
 
@@ -227,32 +219,26 @@ if not st.session_state.selected_greeting:
 if st.session_state.current_stage == 'home':
     today_str = get_today_string()
     
-    # 首頁日期
     st.markdown(f"<div class='date-text'>今日是 {today_str}</div>", unsafe_allow_html=True)
     
-    # 首頁隨機橫向封面圖 (covers 資料夾)
     if st.session_state.selected_cover_path and os.path.exists(st.session_state.selected_cover_path):
         st.image(st.session_state.selected_cover_path, use_container_width=True)
     
-    # 首頁情境問候語
     st.markdown(f"<div class='welcome-text'>{st.session_state.selected_greeting}</div>", unsafe_allow_html=True)
     
-    # 首頁按鈕：現代用語 + 強制置中
+    # 現代化去迷信用語 + 絕對置中按鈕
     if st.button("開啟今日指引"):
         draw_card()
         st.rerun()
 
 elif st.session_state.current_stage == 'result':
-    # 結果頁打橫圖 (cards 資料夾)
     if st.session_state.selected_image_path and os.path.exists(st.session_state.selected_image_path):
         st.image(st.session_state.selected_image_path, use_container_width=True)
     else:
-        st.markdown("<div style='text-align:center; padding:3rem; background:#E6E2DD; border-radius:12px; margin-bottom:1.5rem; color:#8A9A86;'>[ 請確保 cards 資料夾內有放入橫向圖片 ]</div>", unsafe_allow_html=True)
+        st.markdown("<div style='text-align:center; padding:3rem; background:#E6E2DD; border-radius:12px; margin-bottom:1.5rem; color:#8A9A86;'>[ 請確保 cards 資料夾內有放入圖片 ]</div>", unsafe_allow_html=True)
     
-    # 顯示文字內容 
     st.markdown(f"<div class='quote-text'>{st.session_state.selected_quote}</div>", unsafe_allow_html=True)
     
-    # 顯示靜心引導 
     st.markdown(f"""
         <div class='guide-box'>
             <div class='guide-title'>✦ 給此刻的你</div>
@@ -262,7 +248,7 @@ elif st.session_state.current_stage == 'result':
     
     st.write("---")
     
-    # 底部按鈕：雙欄均勻置中
+    # 底部按鈕並排且雙雙絕對置中
     col1, col2 = st.columns(2)
     with col1:
         if st.button("換個視角"):

@@ -4,9 +4,6 @@ import random
 import os
 from datetime import datetime
 import pytz
-from PIL import Image, ImageDraw, ImageFont
-import textwrap
-import io
 
 # 1. 頁面基本設定
 st.set_page_config(
@@ -189,36 +186,6 @@ def reset_app():
     init_home_data()
     st.session_state.current_stage = 'home'
 
-# --- 圖片合成函數 (Pillow) ---
-def generate_share_image(image_path, quote_text):
-    try:
-        base_img = Image.open(image_path).convert("RGBA")
-    except Exception:
-        base_img = Image.new("RGBA", (1080, 1080), (249, 246, 240))
-    
-    base_img = base_img.resize((1080, 1080))
-    overlay = Image.new("RGBA", base_img.size, (0, 0, 0, 70))
-    combined = Image.alpha_composite(base_img, overlay)
-    
-    draw = ImageDraw.Draw(combined)
-    
-    font_path = "font.ttf"
-    try:
-        font = ImageFont.truetype(font_path, 42)
-        small_font = ImageFont.truetype(font_path, 28)
-    except IOError:
-        font = ImageFont.load_default()
-        small_font = ImageFont.load_default()
-
-    wrapped_text = textwrap.fill(quote_text, width=22)
-    
-    draw.text((100, 300), wrapped_text, fill=(255, 255, 255, 255), font=font, spacing=20)
-    draw.text((100, 920), "333 Radiance | 靜心空間", fill=(220, 220, 220, 200), font=small_font)
-    
-    output = io.BytesIO()
-    combined.convert("RGB").save(output, format="JPEG", quality=95)
-    return output.getvalue()
-
 if not st.session_state.selected_greeting:
     init_home_data()
 
@@ -251,22 +218,13 @@ elif st.session_state.current_stage == 'result':
     
     st.write("---")
     
-    # 三欄式佈局：換個視角、下載分享圖、關注 IG
-    col1, col2, col3 = st.columns(3)
+    # 兩欄式佈局：換個視角、關注 IG
+    col1, col2 = st.columns(2)
     with col1:
         if st.button("換個視角", use_container_width=True):
             reset_app()
             st.rerun()
     with col2:
-        img_bytes = generate_share_image(st.session_state.selected_image_path, st.session_state.selected_quote)
-        st.download_button(
-            label="下載分享圖",
-            data=img_bytes,
-            file_name="333_radiance_card.jpg",
-            mime="image/jpeg",
-            use_container_width=True
-        )
-    with col3:
         st.markdown("""
             <div class="ig-btn-container">
                 <a href="https://instagram.com" target="_blank" class="ig-button">

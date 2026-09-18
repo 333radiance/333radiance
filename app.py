@@ -12,31 +12,30 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. 終極除錯版 CSS (解決字體失效、白框、按鈕變形)
+# 2. 終極排版與粗體 CSS (針對 IG 內建瀏覽器特化)
 st.markdown("""
     <style>
-    /* 引入 Chiron GoRound TC 特粗體 */
+    /* 引入 Chiron GoRound TC 與 Google Fonts 備用特粗體 */
     @import url('https://cdn.jsdelivr.net/gh/chiron-fonts/chiron-go-round-tc@v1.000/webfonts/ChironGoRoundTC-ExtraBold.css');
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@900&display=swap');
 
     /* =========================================
-       1. 暴力破解字體：強制全站所有元素使用特粗體
+       1. 強制全站特粗體 (包含完美 Fallback)
        ========================================= */
     * {
-        font-family: 'Chiron GoRound TC', sans-serif !important;
+        font-family: 'Chiron GoRound TC', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif !important;
         font-weight: 900 !important;
     }
 
-    /* 處理背景顏色 */
-    .stApp, html, body {
+    html, body, .stApp {
         background-color: #F9F6F0 !important;
         color: #38332F !important;
     }
     
-    /* 隱藏預設 Streamlit 頂部與底部元素 */
     #MainMenu, footer, header {visibility: hidden;}
     
     /* =========================================
-       2. 內文排版 (確保全部都是特粗字體)
+       2. 內文排版
        ========================================= */
     .date-text {
         text-align: center !important; 
@@ -85,55 +84,55 @@ st.markdown("""
     }
     
     /* =========================================
-       3. 終極解決截圖中的按鈕變形與白框問題
+       3. 按鈕完美對齊與統一樣式
        ========================================= */
     
-    /* 容器強制置中，並增加手機版上下排列時的間距 */
-    .stButton, .ig-btn-container {
+    /* 精準控制 Streamlit 原生按鈕容器 */
+    div[data-testid="stButton"] {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
-        margin-bottom: 15px !important;
+    }
+    
+    /* IG 按鈕容器 */
+    .ig-btn-container {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin-top: 5px !important; /* 增加手機版上下堆疊時的間距 */
     }
 
-    /* 統一樣式：讓 Streamlit 按鈕與 IG 連結看起來 100% 一模一樣 */
-    .stButton > button, a.ig-button {
+    /* 確保兩個按鈕外觀 100% 一致 */
+    div[data-testid="stButton"] button, a.ig-button {
         background-color: #38332F !important;
-        border: 2px solid #38332F !important;
+        color: #F9F6F0 !important;
+        border: none !important;
         border-radius: 30px !important;
         width: 100% !important;
-        max-width: 250px !important; /* 固定最大寬度 */
-        height: 50px !important;     /* 強制固定高度，解決 IG 按鈕縮水 */
+        max-width: 250px !important; /* 控制最大寬度 */
+        height: 50px !important;     /* 強制固定高度 */
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         text-decoration: none !important;
-        box-shadow: none !important;
         transition: all 0.3s ease !important;
+        margin: 0 auto !important;
     }
 
-    /* 殺死截圖中的「白色內框」與字體顏色覆蓋 */
-    .stButton > button * {
+    /* 強制 Streamlit 按鈕內的文字樣式 */
+    div[data-testid="stButton"] button p, a.ig-button {
         color: #F9F6F0 !important;
-        font-family: 'Chiron GoRound TC', sans-serif !important;
-        font-weight: 900 !important;
         font-size: 1.1rem !important;
+        font-weight: 900 !important;
         margin: 0 !important;
         padding: 0 !important;
-        background: transparent !important; /* 強制透明背景，消除白框 */
     }
 
-    /* IG 連結文字專屬設定 */
-    a.ig-button {
-        color: #F9F6F0 !important;
-        font-size: 1.1rem !important;
-    }
-
-    /* 懸停漸變效果 */
-    .stButton > button:hover, a.ig-button:hover {
+    /* 滑鼠懸停 / 點擊漸變效果 */
+    div[data-testid="stButton"] button:hover, a.ig-button:hover {
         background-color: #5A544D !important;
-        border-color: #5A544D !important;
         transform: translateY(-2px) !important;
     }
     </style>
@@ -216,7 +215,8 @@ if st.session_state.current_stage == 'home':
     
     st.markdown(f"<div class='welcome-text'>{st.session_state.selected_greeting}</div>", unsafe_allow_html=True)
     
-    if st.button("開啟今日指引"):
+    # 加上 use_container_width=True 強制展開
+    if st.button("開啟今日指引", use_container_width=True):
         draw_card()
         st.rerun()
 
@@ -235,10 +235,10 @@ elif st.session_state.current_stage == 'result':
     
     st.write("---")
     
-    # 底部按鈕排版 (手機版會自動上下排列，已透過 CSS margin 調整間距)
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("換個視角"):
+        # 加上 use_container_width=True 徹底解決截圖中按鈕縮小的問題
+        if st.button("換個視角", use_container_width=True):
             reset_app()
             st.rerun()
     with col2:

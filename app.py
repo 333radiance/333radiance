@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import random
 import os
+from datetime import datetime
 
 # 1. 頁面基本設定
 st.set_page_config(
@@ -26,16 +27,35 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* 金句排版 (引號與大字體) */
+    /* 首頁日期與標題 */
+    .date-text {
+        text-align: center; 
+        color: #8A9A86; 
+        font-size: 1.1rem;
+        font-weight: 500;
+        letter-spacing: 2px;
+        margin-top: 3rem;
+    }
+    .welcome-text {
+        text-align: center; 
+        color: #38332F; 
+        font-size: 1.8rem;
+        line-height: 1.6;
+        margin-top: 1.5rem;
+        margin-bottom: 4rem;
+        font-weight: 400;
+    }
+    
+    /* 金句排版 */
     .quote-text {
-        font-size: 1.2rem;
+        font-size: 1.15rem;
         line-height: 1.8;
         font-weight: 400;
         color: #2B2927;
         padding: 2rem;
         background-color: #F0EAE1;
         border-radius: 12px;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         text-align: justify;
         letter-spacing: 0.5px;
     }
@@ -46,7 +66,7 @@ st.markdown("""
         line-height: 1.7;
         color: #4A4541;
         padding: 1.5rem;
-        border-left: 4px solid #8A9A86;
+        border-left: 3px solid #8A9A86;
         background-color: transparent;
         margin-bottom: 2rem;
     }
@@ -55,8 +75,8 @@ st.markdown("""
         font-size: 0.9rem;
         color: #8A9A86;
         font-weight: 600;
-        margin-bottom: 0.5rem;
-        letter-spacing: 1px;
+        margin-bottom: 0.8rem;
+        letter-spacing: 1.5px;
     }
     
     /* 按鈕美化 */
@@ -65,10 +85,11 @@ st.markdown("""
         color: #F9F6F0;
         border: none;
         border-radius: 8px;
-        padding: 0.5rem 2rem;
-        font-size: 1rem;
+        padding: 0.6rem 2rem;
+        font-size: 1.05rem;
         transition: all 0.3s ease;
         width: 100%;
+        letter-spacing: 1px;
     }
     .stButton>button:hover {
         background-color: #5A544D;
@@ -100,21 +121,24 @@ if 'selected_guide' not in st.session_state:
 if 'selected_image_id' not in st.session_state:
     st.session_state.selected_image_id = 1
 
+# 獲取今日日期字串
+def get_today_string():
+    now = datetime.now()
+    weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日']
+    weekday_str = weekdays[now.weekday()]
+    return f"{now.year}年{now.month}月{now.day}日 {weekday_str}"
+
 # 5. 核心邏輯函數
-def draw_card(user_need):
+def draw_card():
     # 隨機抽取金句
     if not quotes_df.empty:
         st.session_state.selected_quote = random.choice(quotes_df['text'].tolist())
     
-    # 根據使用者的「需要」篩選並隨機抽取靜心引導
+    # 隨機抽取靜心引導 (不需再手動選擇，創造隨機的驚喜感)
     if not guides_df.empty:
-        filtered_guides = guides_df[guides_df['category'] == user_need]
-        if not filtered_guides.empty:
-            st.session_state.selected_guide = random.choice(filtered_guides['text'].tolist())
-        else:
-            st.session_state.selected_guide = random.choice(guides_df['text'].tolist()) # 防呆機制
+        st.session_state.selected_guide = random.choice(guides_df['text'].tolist())
             
-    # 隨機抽取圖片 ID (假設你有 1~99 張圖片在 cards/ 資料夾中)
+    # 隨機抽取圖片 ID (假設有 1~99 張圖片)
     st.session_state.selected_image_id = random.randint(1, 99)
     
     # 切換頁面狀態
@@ -125,39 +149,33 @@ def reset_app():
 
 # 6. 介面渲染
 if st.session_state.current_stage == 'home':
-    st.markdown("<h2 style='text-align: center; color: #38332F; margin-top: 2rem;'>333 Radiance</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #666;'>給自己一個安靜的片刻</p>", unsafe_allow_html=True)
+    today_str = get_today_string()
     
-    st.write("---")
+    # 首頁排版
+    st.markdown(f"<div class='date-text'>今日是 {today_str}</div>", unsafe_allow_html=True)
+    st.markdown("<div class='welcome-text'>或許今天的你，<br>會需要一點心靈的指引。</div>", unsafe_allow_html=True)
     
-    if not guides_df.empty:
-        # 動態抓取 guides.csv 裡面的所有「需要」類別
-        needs_options = guides_df['category'].unique().tolist()
-        
-        st.markdown("#### 你當下最需要什麼？")
-        user_need = st.selectbox("請選擇一個最貼近你目前狀態的選項：", needs_options, label_visibility="collapsed")
-        
-        st.write("")
-        st.write("")
-        
-        if st.button("抽取今日指引"):
-            draw_card(user_need)
+    # 置中按鈕
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("抽取今日卡片"):
+            draw_card()
             st.rerun()
 
 elif st.session_state.current_stage == 'result':
-    # 顯示圖片 (這裡假設圖片命名格式為 card_001.jpg 到 card_099.jpg)
+    # 顯示圖片 
     image_filename = f"cards/card_{st.session_state.selected_image_id:03d}.jpg"
     
-    # 檢查圖片是否存在，若無則顯示佔位文字
     if os.path.exists(image_filename):
         st.image(image_filename, use_container_width=True)
     else:
-        st.markdown(f"<div style='text-align:center; padding:4rem; background:#E6E2DD; border-radius:12px; margin-bottom:2rem;'>圖片 {image_filename} 將顯示於此</div>", unsafe_allow_html=True)
+        # 無圖片時的質感佔位
+        st.markdown(f"<div style='text-align:center; padding:4rem; background:#E6E2DD; border-radius:12px; margin-bottom:2rem; color:#8A9A86;'>[ 靜心圖卡 {st.session_state.selected_image_id:03d} ]</div>", unsafe_allow_html=True)
     
-    # 顯示金句 (Story & Wisdom)
+    # 顯示金句 
     st.markdown(f"<div class='quote-text'>{st.session_state.selected_quote}</div>", unsafe_allow_html=True)
     
-    # 顯示靜心引導 (Modern Explanation / Action)
+    # 顯示靜心引導 
     st.markdown(f"""
         <div class='guide-box'>
             <div class='guide-title'>✦ 給此刻的你</div>
@@ -174,7 +192,6 @@ elif st.session_state.current_stage == 'result':
             reset_app()
             st.rerun()
     with col2:
-        # Instagram 連結按鈕 (使用 markdown 模擬按鈕樣式)
         st.markdown("""
             <a href="https://instagram.com" target="_blank" style="text-decoration: none;">
                 <button style="width: 100%; background-color: transparent; color: #38332F; border: 1px solid #38332F; border-radius: 8px; padding: 0.5rem 2rem; font-size: 1rem; cursor: pointer;">
